@@ -12,7 +12,7 @@ module.exports = {
       name: {
         type: Sequelize.STRING,
       },
-      UnitType: {
+      unitType: {
         type: Sequelize.STRING,
       },
       numberOfUnits: {
