@@ -1,5 +1,10 @@
+const { StatusCodes } = require('http-status-codes');
+const { Building } = require('../models');
+
 const getAllBuildings = async (req, res) => {
-  res.send('get all buildings');
+  const buildings = await Building.findAll({ raw: true, attributes: ['name', 'unitType', 'numberOfUnits'] });
+  console.log(buildings);
+  res.status(StatusCodes.OK).json(buildings);
 };
 
 const getBuilding = async (req, res) => {
