@@ -6,11 +6,11 @@ const {
   getAllUnits,
   getUnit,
   addUnitToStable,
-  updateUnit,
+  feedUnit,
   deleteUnit,
 } = require('../controllers/units');
 
 router.route('/').post(addUnitToStable).get(getAllUnits);
-router.route('/:id').get(getUnit).patch(updateUnit).delete(deleteUnit);
+router.route('/:id').get(getUnit).patch(feedUnit).delete(deleteUnit);
 
 module.exports = router;

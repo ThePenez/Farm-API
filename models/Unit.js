@@ -35,6 +35,7 @@ module.exports = (sequelize, DataTypes) => {
     type: DataTypes.STRING,
     health: DataTypes.INTEGER,
     alive: DataTypes.BOOLEAN,
+    feedable: DataTypes.BOOLEAN,
   }, {});
 
   Unit.associate = (models) => {
