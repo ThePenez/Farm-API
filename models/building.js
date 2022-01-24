@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
 
   Building.associate = (models) => {
-    Building.hasMany(models.Unit, {as: 'units'});
+    Building.hasMany(models.Unit, { as: 'units' });
   };
   return Building;
 };

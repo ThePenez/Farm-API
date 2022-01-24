@@ -1,7 +1,8 @@
 const { StatusCodes } = require('http-status-codes');
 const { createCustomError } = require('../errors/custom-error');
 const asyncWrapper = require('../middleware/async-wrapper');
-const { Building } = require('../models');
+const { Building, Unit } = require('../models');
+const { buildingFeedingInterval } = require('./config_intervals');
 
 const getAllBuildings = asyncWrapper(async (req, res) => {
   const buildings = await Building.findAll({ raw: true, attributes: ['name', 'unitType', 'numberOfUnits'] });
@@ -12,7 +13,7 @@ const getAllBuildings = asyncWrapper(async (req, res) => {
 // eslint-disable-next-line consistent-return
 const getBuilding = asyncWrapper(async (req, res, next) => {
   const { id: buildingID } = req.params;
-  const building = await Building.findByPk(buildingID, { attributes: ['name', 'unitType', 'numberOfUnits'], include: ['units'] });
+  const building = await Building.findByPk(buildingID, { attributes: ['name', 'unitType', 'numberOfUnits'], include: [{ model: Unit, as: 'units', attributes: ['id', 'health', 'alive'] }] });
   if (!building) {
     return next(createCustomError(`No building with id : ${buildingID}`, 404));
   }
@@ -29,8 +30,8 @@ const createBuilding = asyncWrapper(async (req, res) => {
     updatedAt: new Date(),
   };
 
-  const result = Building.create(building);
-  res.status(StatusCodes.CREATEDK).json(result);
+  const result = await Building.create(building);
+  res.status(StatusCodes.CREATED).json(result);
 });
 
 const updateBuilding = asyncWrapper(async (req, res) => {
