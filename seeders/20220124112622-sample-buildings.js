@@ -7,14 +7,14 @@ module.exports = {
       [
         {
           name: 'Stable',
-          UnitType: 'Horse',
+          unitType: 'Horse',
           numberOfUnits: '0',
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
           name: 'Cowshed',
-          UnitType: 'Cow',
+          unitType: 'Cow',
           numberOfUnits: '0',
           createdAt: new Date(),
           updatedAt: new Date(),
