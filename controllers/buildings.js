@@ -2,7 +2,7 @@ const { StatusCodes } = require('http-status-codes');
 const { createCustomError } = require('../errors/custom-error');
 const asyncWrapper = require('../middleware/async-wrapper');
 const { Building, Unit } = require('../models');
-const { buildingFeedingInterval } = require('./config_intervals');
+const { buildingFeedingInterval } = require('./config_values');
 
 const getAllBuildings = asyncWrapper(async (req, res) => {
   const buildings = await Building.findAll({ raw: true, attributes: ['name', 'unitType', 'numberOfUnits'] });

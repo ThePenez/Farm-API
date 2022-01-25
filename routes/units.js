@@ -5,12 +5,12 @@ const router = express.Router();
 const {
   getAllUnits,
   getUnit,
-  addUnitToStable,
+  addUnitToBuilding,
   feedUnit,
   deleteUnit,
 } = require('../controllers/units');
 
-router.route('/').post(addUnitToStable).get(getAllUnits);
+router.route('/').post(addUnitToBuilding).get(getAllUnits);
 router.route('/:id').get(getUnit).patch(feedUnit).delete(deleteUnit);
 
 module.exports = router;
