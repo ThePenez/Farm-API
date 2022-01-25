@@ -1,31 +1,4 @@
 'use strict';
-
-// const {
-//   Model,
-// } = require('sequelize');
-
-// module.exports = (sequelize, DataTypes) => {
-//   class Building extends Model {
-//     /**
-//      * Helper method for defining associations.
-//      * This method is not a part of Sequelize lifecycle.
-//      * The `models/index` file will call this method automatically.
-//      */
-//     static associate(models) {
-//       this.hasMany(models.Unit, { as: 'units' });
-//     }
-//   }
-//   Building.init({
-//     name: DataTypes.STRING,
-//     unitType: DataTypes.STRING,
-//     numberOfUnits: DataTypes.INTEGER,
-//   }, {
-//     sequelize,
-//     modelName: 'Building',
-//   });
-//   return Building;
-// };
-
 module.exports = (sequelize, DataTypes) => {
   const Building = sequelize.define('Building', {
     id: {
@@ -37,9 +10,6 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     unitType: {
       type: DataTypes.STRING,
-      validate: {
-        isIn: [['Horse', 'Sheep', 'Pig', 'Goat', 'Donkey', 'Turkey', 'Chicken', 'Bull', 'Cow', 'Goose', 'Rooster', 'Pheasant']],
-      },
     },
     numberOfUnits: DataTypes.INTEGER,
   }, {});

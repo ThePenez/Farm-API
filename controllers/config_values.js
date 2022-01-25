@@ -4,6 +4,7 @@ const unfeedableInterval = 5000; // Interval for which a Unit cannot be manually
 const unitMaxHealth = 50;// Max unit health
 const unitMinHealth = 100; // Min unit health
 const healthLost = 1; // Health lost when the unit feeding interval ends
+const manualFeedingGain = 1; // Health a unit regains when manually fed
 
 function timeout(ms) {
   // eslint-disable-next-line no-promise-executor-return
@@ -23,4 +24,5 @@ module.exports = {
   timeout,
   feedingCountdowns,
   feedAllUnitsIntervals,
+  manualFeedingGain,
 };

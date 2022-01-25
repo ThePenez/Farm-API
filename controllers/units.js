@@ -13,6 +13,7 @@ const {
   timeout,
   feedingCountdowns,
   feedAllUnitsIntervals,
+  manualFeedingGain
 } = require('./config_values');
 
 const getAllUnits = async (req, res) => { // GET id, type, health, aliveness and the building they're in for all farm units
@@ -91,7 +92,8 @@ const feedUnit = asyncWrapper(async (req, res, next) => { // PATCH feed unit wit
     return next(createCustomError('This unit cannot be fed', StatusCodes.NOT_ACCEPTABLE));
   }
   const result = await Unit
-    .update({ health: unit.health + 1, feedable: false }, { where: { id: unitID } });
+    .update({ health: unit.health + manualFeedingGain, feedable: false }, { where: { id: unitID } });
+  console.log(`Unit with id: ${unit.id} was manually fed and regained ${manualFeedingGain} health`);
   await timeout(unfeedableInterval);
   const result2 = await Unit
     .update({ feedable: true }, { where: { id: unitID } });
