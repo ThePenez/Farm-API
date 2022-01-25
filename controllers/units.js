@@ -15,22 +15,22 @@ const {
   feedAllUnitsIntervals,
 } = require('./config_values');
 
-const getAllUnits = async (req, res) => {
-  const units = await Unit.findAll({ raw: true, attributes: ['id', 'type', 'health', 'alive'] });
+const getAllUnits = async (req, res) => { // GET id, type, health, aliveness and the building they're in for all farm units
+  const units = await Unit.findAll({ raw: true, attributes: ['id', 'type', 'health', 'alive', 'BuildingId'] });
   console.log(units);
   res.status(StatusCodes.OK).json(units);
 };
 
-const getUnit = asyncWrapper(async (req, res, next) => {
+const getUnit = asyncWrapper(async (req, res, next) => { // GET id and name of the building it's in for a specific farm unit
   const { id: unitID } = req.params;
   const unit = await Unit.findByPk(unitID, { include: [{ model: Building, attributes: ['name'] }] });
   if (!unit) {
-    return next(createCustomError(`No unit with id : ${unitID}`, 404));
+    return next(createCustomError(`No unit with id : ${unitID}`, StatusCodes.NOT_FOUND));
   }
   res.status(StatusCodes.OK).json({ unit });
 });
 
-const addUnitToBuilding = asyncWrapper(async (req, res, next) => {
+const addUnitToBuilding = asyncWrapper(async (req, res, next) => { // POST create a unit with given type and random health, add it to a building, start it's feeding countdown
   const { type, buildingId } = req.body;
   const building = await Building.findByPk(buildingId);
   if (!building) {
@@ -39,7 +39,7 @@ const addUnitToBuilding = asyncWrapper(async (req, res, next) => {
   if (!building.unitType.includes(type)) {
     return next(createCustomError(`A ${type} cannot be added to a ${building.name}`, StatusCodes.NOT_ACCEPTABLE));
   }
-  const health = Math.floor(Math.random() * (unitMaxHealth - unitMinHealth + 1) + unitMinHealth);
+  const health = Math.floor(Math.random() * (unitMaxHealth - unitMinHealth + 1) + unitMinHealth); // Sets health to a random number between unitHealthMax and unitHealthMin
   const unit = {
     type,
     health,
@@ -50,10 +50,8 @@ const addUnitToBuilding = asyncWrapper(async (req, res, next) => {
     feedable: true,
   };
   const result = await Unit.create(unit);
-  console.log('before assignment');
   feedAllUnitsIntervals[String(result.BuildingId)][String(result.id)] = 0;
-  console.log('after assignment');
-  feedingCountdowns[String(result.id)] = setInterval(async () => {
+  feedingCountdowns[String(result.id)] = setInterval(async () => { // Can be a function by itself, sets feeding countdown
     const unitToUpdate = await Unit.findByPk(result.id);
     if (unitToUpdate.health - healthLost <= 0) {
       await Unit
@@ -86,7 +84,7 @@ const addUnitToBuilding = asyncWrapper(async (req, res, next) => {
   res.status(StatusCodes.CREATED).json({ result, resultBuilding });
 });
 
-const feedUnit = asyncWrapper(async (req, res, next) => { // feed unit
+const feedUnit = asyncWrapper(async (req, res, next) => { // PATCH feed unit with given id, add health to it and make it unfeedable for the set amount of miliseconds
   const { id: unitID } = req.params;
   const unit = await Unit.findByPk(unitID);
   if (!unit.feedable) {
@@ -100,7 +98,7 @@ const feedUnit = asyncWrapper(async (req, res, next) => { // feed unit
   res.status(StatusCodes.OK).json({ result, result2, success: true });
 });
 
-const deleteUnit = asyncWrapper(async (req, res, next) => {
+const deleteUnit = asyncWrapper(async (req, res, next) => { // DELETE a unit, stop it's feeding countdown and delete it from the array of intervals
   const { id: unitID } = req.params;
 
   const unit = await Unit.findByPk(unitID);
@@ -111,18 +109,18 @@ const deleteUnit = asyncWrapper(async (req, res, next) => {
     }
     await Building
       .update(
-        { numberOfUnits: buildingToUpdate.numberOfUnits - 1 },
+        { numberOfUnits: buildingToUpdate.numberOfUnits - 1 }, // Decrement number of units in the building
         { where: { id: buildingToUpdate.id } },
       );
 
-    clearInterval(feedingCountdowns[String(unitID)]);
-    delete feedingCountdowns[String(unitID)];
+    clearInterval(feedingCountdowns[String(unitID)]); // Stop unit's feeding countdown
+    delete feedingCountdowns[String(unitID)]; // Delete it from the array
   }
   const result = await Unit.destroy({ where: { id: unitID } });
   if (!result) {
     return next(createCustomError(`No unit with id : ${unitID}`, StatusCodes.NOT_FOUND));
   }
-  res.status(200).json({ result });
+  res.status(StatusCodes.OK).json({ result });
 });
 
 module.exports = {

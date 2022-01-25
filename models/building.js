@@ -35,7 +35,12 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
     },
     name: DataTypes.STRING,
-    unitType: DataTypes.STRING,
+    unitType: {
+      type: DataTypes.STRING,
+      validate: {
+        isIn: [['Horse', 'Sheep', 'Pig', 'Goat', 'Donkey', 'Turkey', 'Chicken', 'Bull', 'Cow', 'Goose', 'Rooster', 'Pheasant']],
+      },
+    },
     numberOfUnits: DataTypes.INTEGER,
   }, {});
 
