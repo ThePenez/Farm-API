@@ -10,6 +10,8 @@ const {
   healthLost,
   unfeedableInterval,
   timeout,
+  feedingCountdowns,
+  feedAllUnitsIntervals,
 } = require('./config_values');
 
 const getAllUnits = async (req, res) => {
@@ -45,8 +47,7 @@ const addUnitToBuilding = asyncWrapper(async (req, res, next) => {
     feedable: true,
   };
   const result = await Unit.create(unit);
-
-  const feedingCountdown = setInterval(async () => {
+  feedingCountdowns[String(result.id)] = setInterval(async () => {
     const unitToUpdate = await Unit.findByPk(result.id);
     if (unitToUpdate.health - healthLost <= 0) {
       await Unit
@@ -61,7 +62,7 @@ const addUnitToBuilding = asyncWrapper(async (req, res, next) => {
           { numberOfUnits: buildingToUpdate.numberOfUnits - 1 },
           { where: { id: buildingToUpdate.id } },
         );
-      clearInterval(feedingCountdown);
+      clearInterval(feedingCountdowns[unitToUpdate.id]);
     } else {
       await Unit
         .update(
@@ -70,6 +71,7 @@ const addUnitToBuilding = asyncWrapper(async (req, res, next) => {
         );
     }
   }, unitFeedingInterval);
+  console.log(feedingCountdowns);
   const resultBuilding = await Building
     .update({ numberOfUnits: building.numberOfUnits + 1 }, { where: { id: buildingId } });
   res.status(StatusCodes.CREATED).json({ result, resultBuilding });
@@ -89,20 +91,24 @@ const feedUnit = asyncWrapper(async (req, res, next) => { // feed unit
   res.status(StatusCodes.OK).json({ result, result2, success: true });
 });
 
-const deleteUnit = asyncWrapper(async (req, res, next) => { // ***NEEDS TO CLEAR INTERVAL***
+const deleteUnit = asyncWrapper(async (req, res, next) => {
   const { id: unitID } = req.params;
 
   const unit = await Unit.findByPk(unitID);
-  const buildingToUpdate = await Building.findByPk(unit.BuildingId);
-  if (!buildingToUpdate) {
-    return next(createCustomError(`No building with id : ${unit.BuildingId} where unit with id: ${unitID} is currently located`, StatusCodes.NOT_FOUND));
-  }
-  await Building
-    .update(
-      { numberOfUnits: buildingToUpdate.numberOfUnits - 1 },
-      { where: { id: buildingToUpdate.id } },
-    );
+  if (unit.alive) {
+    const buildingToUpdate = await Building.findByPk(unit.BuildingId);
+    if (!buildingToUpdate) {
+      return next(createCustomError(`No building with id : ${unit.BuildingId} where unit with id: ${unitID} is currently located`, StatusCodes.NOT_FOUND));
+    }
+    await Building
+      .update(
+        { numberOfUnits: buildingToUpdate.numberOfUnits - 1 },
+        { where: { id: buildingToUpdate.id } },
+      );
 
+    clearInterval(feedingCountdowns[String(unitID)]);
+  }
+  delete feedingCountdowns[String(unitID)];
   const result = await Unit.destroy({ where: { id: unitID } });
   if (!result) {
     return next(createCustomError(`No unit with id : ${unitID}`, StatusCodes.NOT_FOUND));

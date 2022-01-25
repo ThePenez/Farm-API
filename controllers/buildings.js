@@ -2,7 +2,7 @@ const { StatusCodes } = require('http-status-codes');
 const { createCustomError } = require('../errors/custom-error');
 const asyncWrapper = require('../middleware/async-wrapper');
 const { Building, Unit } = require('../models');
-const { buildingFeedingInterval } = require('./config_values');
+const { buildingFeedingInterval, feedAllUnitsIntervals } = require('./config_values');
 
 const getAllBuildings = asyncWrapper(async (req, res) => {
   const buildings = await Building.findAll({ raw: true, attributes: ['name', 'unitType', 'numberOfUnits'] });
@@ -31,6 +31,9 @@ const createBuilding = asyncWrapper(async (req, res) => {
   };
 
   const result = await Building.create(building);
+  feedAllUnitsIntervals[String(result.id)] = setInterval(() => {
+    console.log(`Feed all ALIVE units in building with id: ${result.id}`);
+  }, buildingFeedingInterval);
   res.status(StatusCodes.CREATED).json(result);
 });
 
@@ -39,8 +42,10 @@ const updateBuilding = asyncWrapper(async (req, res) => {
 });
 
 // eslint-disable-next-line consistent-return
-const deleteBuilding = asyncWrapper(async (req, res, next) => {
+const deleteBuilding = asyncWrapper(async (req, res, next) => { // ***NEEDS TO CLEAR INTERVAL***
   const { id: buildingID } = req.params;
+  clearInterval(feedAllUnitsIntervals[String(buildingID)]);
+  delete feedAllUnitsIntervals[String(buildingID)];
   const result = await Building.destroy({ where: { id: buildingID } });
   if (!result) {
     return next(createCustomError(`No building with id : ${buildingID}`, 404));
