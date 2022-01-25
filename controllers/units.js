@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable consistent-return */
 const { StatusCodes } = require('http-status-codes');
 const { createCustomError } = require('../errors/custom-error');
@@ -15,7 +16,9 @@ const {
 } = require('./config_values');
 
 const getAllUnits = async (req, res) => {
-  res.send('get all units');
+  const units = await Unit.findAll({ raw: true, attributes: ['id', 'type', 'health', 'alive'] });
+  console.log(units);
+  res.status(StatusCodes.OK).json(units);
 };
 
 const getUnit = asyncWrapper(async (req, res, next) => {
@@ -47,6 +50,9 @@ const addUnitToBuilding = asyncWrapper(async (req, res, next) => {
     feedable: true,
   };
   const result = await Unit.create(unit);
+  console.log('before assignment');
+  feedAllUnitsIntervals[String(result.BuildingId)][String(result.id)] = 0;
+  console.log('after assignment');
   feedingCountdowns[String(result.id)] = setInterval(async () => {
     const unitToUpdate = await Unit.findByPk(result.id);
     if (unitToUpdate.health - healthLost <= 0) {
@@ -55,23 +61,26 @@ const addUnitToBuilding = asyncWrapper(async (req, res, next) => {
           { health: 0, alive: false, feedable: false },
           { where: { id: unitToUpdate.id } },
         );
-      // eslint-disable-next-line max-len
       const buildingToUpdate = await Building.findByPk(buildingId); // Called in the case of the number of units in a building changing during the interval so we have the updated value
       await Building
         .update(
           { numberOfUnits: buildingToUpdate.numberOfUnits - 1 },
           { where: { id: buildingToUpdate.id } },
         );
-      clearInterval(feedingCountdowns[unitToUpdate.id]);
+      clearInterval(feedingCountdowns[String(unitToUpdate.id)]);
+      delete feedingCountdowns[String(unitToUpdate.id)];
+      delete feedAllUnitsIntervals[String(unitToUpdate.BuildingId)][String(unitToUpdate.id)]; // If the unit dies stop it's feeding countdown and delete her from the building feeding list
     } else {
       await Unit
         .update(
           { health: unitToUpdate.health - healthLost },
           { where: { id: unitToUpdate.id } },
         );
+      feedAllUnitsIntervals[String(unitToUpdate.BuildingId)][String(unitToUpdate.id)] += healthLost; // Update health lost in the previous interval so it can regain half of it
+      console.log(`Unit with id: ${unitToUpdate.id} lost ${healthLost} health`);
     }
   }, unitFeedingInterval);
-  console.log(feedingCountdowns);
+  // console.log(feedingCountdowns);
   const resultBuilding = await Building
     .update({ numberOfUnits: building.numberOfUnits + 1 }, { where: { id: buildingId } });
   res.status(StatusCodes.CREATED).json({ result, resultBuilding });
@@ -107,8 +116,8 @@ const deleteUnit = asyncWrapper(async (req, res, next) => {
       );
 
     clearInterval(feedingCountdowns[String(unitID)]);
+    delete feedingCountdowns[String(unitID)];
   }
-  delete feedingCountdowns[String(unitID)];
   const result = await Unit.destroy({ where: { id: unitID } });
   if (!result) {
     return next(createCustomError(`No unit with id : ${unitID}`, StatusCodes.NOT_FOUND));
