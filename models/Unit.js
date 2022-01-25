@@ -32,7 +32,12 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       autoIncrement: true,
     },
-    type: DataTypes.STRING,
+    type: {
+      type: DataTypes.STRING,
+      validate: {
+        isIn: [['Horse', 'Sheep', 'Pig', 'Goat', 'Donkey', 'Turkey', 'Chicken', 'Bull', 'Cow', 'Goose', 'Rooster', 'Pheasant']],
+      },
+    },
     health: DataTypes.INTEGER,
     alive: DataTypes.BOOLEAN,
     feedable: DataTypes.BOOLEAN,
