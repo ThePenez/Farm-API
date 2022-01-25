@@ -39,7 +39,6 @@ async function unitDeath(unitID, buildingID) { // Declares a unit is not alive o
       { health: 0, alive: false, feedable: false },
       { where: { id: unitID } },
     );
-  // decrease number of units
   await changeNumberOfUnits(buildingID, -1);
 }
 
@@ -80,9 +79,9 @@ const addUnitToBuilding = asyncWrapper(async (req, res, next) => { // POST creat
   };
   const result = await Unit.create(unit);
   feedAllUnitsIntervals[String(result.BuildingId)][String(result.id)] = 0; // Initialize counter for health lost during farm feeding interval
-  feedingCountdowns[String(result.id)] = setInterval(async () => { // Can be a function by itself, sets feeding countdown
+  feedingCountdowns[String(result.id)] = setInterval(async () => { // Set feeding countdown for the unit
     const unitToUpdate = await Unit.findByPk(result.id);
-    if (unitToUpdate.health - healthLost <= 0) {
+    if (unitToUpdate.health - healthLost <= 0) { // If the health reaches 0 trigger unit death
       await unitDeath(unitToUpdate.id, buildingId);
       removeInterval(unitToUpdate.id);
       delete feedAllUnitsIntervals[String(unitToUpdate.BuildingId)][String(unitToUpdate.id)]; // If the unit dies stop it's feeding countdown and delete her from the building feeding list
