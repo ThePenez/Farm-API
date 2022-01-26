@@ -40,7 +40,7 @@ const createBuilding = asyncWrapper(async (req, res) => { // POST create a build
       if (unit.alive) {
         healthToRegain = Math.ceil(feedAllUnitsIntervals[String(buildingToFeed.id)][String(unit.id)] / 2); // Calculating how much health is to be regained
         console.log(`Unit with the id: ${unit.id} regained ${healthToRegain} health, fed by building with id: ${buildingToFeed.id}`);
-        feedAllUnitsIntervals[String(buildingToFeed.id)][String(unit.id)] = 0; // Reset for next farm feeding interval
+        feedAllUnitsIntervals[String(buildingToFeed.id)][String(unit.id)] = 0; // Reset the counter of lost health for next farm feeding interval
         await Unit.update({ health: unit.health + healthToRegain }, { where: { id: unit.id } }); // Regain health
       }
     }));

@@ -33,7 +33,7 @@ async function changeNumberOfUnits(buildingID, increment) { // Incerements or de
     );
 }
 
-async function unitDeath(unitID, buildingID) { // Declares a unit is not alive or feedable and decreases number of units in building
+async function unitDeath(unitID, buildingID) { // Declares that a unit is not alive or feedable and decreases number of units in building
   await Unit
     .update(
       { health: 0, alive: false, feedable: false },
@@ -83,7 +83,7 @@ const addUnitToBuilding = asyncWrapper(async (req, res, next) => { // POST creat
     const unitToUpdate = await Unit.findByPk(result.id);
     if (unitToUpdate.health - healthLost <= 0) { // If the health reaches 0 trigger unit death
       await unitDeath(unitToUpdate.id, buildingId);
-      removeInterval(unitToUpdate.id);
+      removeInterval(unitToUpdate.id); // And remove and delete its feeding countdown
       delete feedAllUnitsIntervals[String(unitToUpdate.BuildingId)][String(unitToUpdate.id)]; // If the unit dies stop it's feeding countdown and delete her from the building feeding list
     } else {
       await Unit
@@ -95,7 +95,7 @@ const addUnitToBuilding = asyncWrapper(async (req, res, next) => { // POST creat
       console.log(`Unit with id: ${unitToUpdate.id} lost ${healthLost} health`);
     }
   }, unitFeedingInterval);
-  await changeNumberOfUnits(buildingId, 1);
+  await changeNumberOfUnits(buildingId, 1); // Increment the number of units in corespondent building by 1
   res.status(StatusCodes.CREATED).json({ result });
 });
 
@@ -106,9 +106,9 @@ const feedUnit = asyncWrapper(async (req, res, next) => { // PATCH feed unit wit
     return next(createCustomError('This unit cannot be fed', StatusCodes.NOT_ACCEPTABLE));
   }
   const result = await Unit
-    .update({ health: unit.health + manualFeedingGain, feedable: false }, { where: { id: unitID } });
+    .update({ health: unit.health + manualFeedingGain, feedable: false }, { where: { id: unitID } }); // Update health and set feedable to false
   console.log(`Unit with id: ${unit.id} was manually fed and regained ${manualFeedingGain} health`);
-  await timeout(unfeedableInterval);
+  await timeout(unfeedableInterval); // Timeout for the given amount of seconds
   const result2 = await Unit
     .update({ feedable: true }, { where: { id: unitID } });
   res.status(StatusCodes.OK).json({ result, result2, success: true });
@@ -119,9 +119,9 @@ const deleteUnit = asyncWrapper(async (req, res, next) => { // DELETE a unit, st
 
   const unit = await Unit.findByPk(unitID);
   if (unit.alive) {
-    await changeNumberOfUnits(unit.BuildingId, -1);
+    await changeNumberOfUnits(unit.BuildingId, -1); // Decrement the number of units in corespondent building by 1
 
-    removeInterval(unitID);
+    removeInterval(unitID); // Remove and delete the feeding countdown of this unit
   }
   const result = await Unit.destroy({ where: { id: unitID } });
   if (!result) {
