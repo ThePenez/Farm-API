@@ -13,10 +13,10 @@ ROUTES:
 
 Buildings:
 
-GET api/v1/buildings --> get name, unit type and number of units for all buildings
-POST api/v1/buildings --> create a building and set it's farm feeding interval to feed all of the units in it
-GET api/v1/buildings/:id --> get name, unit type, number of units of a building, along with id, health and aliveness for all the units in it
-DELETE api/v1/buildings/:id --> delete a building, stop its farm feeding interval and remove it from the array
+GET api/v1/buildings --> get name, unit type and number of units for all buildings\n
+POST api/v1/buildings --> create a building and set it's farm feeding interval to feed all of the units in it\n
+GET api/v1/buildings/:id --> get name, unit type, number of units of a building, along with id, health and aliveness for all the units in it\n
+DELETE api/v1/buildings/:id --> delete a building, stop its farm feeding interval and remove it from the array\n
 
 Units:
 
