@@ -1,0 +1,41 @@
+version: "3.8"
+services:
+  postgres_db:
+    container_name: postgres_db
+    image: postgres
+    environment:
+      POSTGRES_DB: database_development
+      POSTGRES_USER: postgres
+      POSTGRES_PASS: parapodzoli
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - postgres
+  node_backend:
+    container_name: node_backend
+    image: jovanpenezic/farm-simulator-2022
+    build: 
+      context: .
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: postgres_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: parapodzoli
+    depends_on:
+      - postgres_db
+    networks:
+      - postgres
+volumes:
+  pgdata: {}
+networks:
+  postgres:
+    driver: bridge
+
+  
+  
+
+  
