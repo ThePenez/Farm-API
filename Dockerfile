@@ -7,7 +7,6 @@ RUN npm install
 
 COPY . .
 
-RUN npx sequelize-cli db:migrate
 
 EXPOSE 3000
 CMD [ "node", "-r", "dotenv/config", "app.js" ]
