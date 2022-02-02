@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.16.5",
+    "@babel/register": "^7.16.9",
     "eslint": "^8.7.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-node": "^4.1.0",

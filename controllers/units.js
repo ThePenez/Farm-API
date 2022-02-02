@@ -3,8 +3,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { createCustomError } from '../errors/custom-error.js';
 import asyncWrapper from '../middleware/async-wrapper.js';
-import Building from '../models/building.js';
-import Unit from '../models/Unit.js';
+import db from '../dist/db/models/index.js';
 import {
   unitFeedingInterval,
   unitMaxHealth,
@@ -16,6 +15,9 @@ import {
   feedAllUnitsIntervals,
   manualFeedingGain,
 } from './config_values.js';
+
+const { Building } = db;
+const { Unit } = db;
 
 // ***FUNCTIONS***
 const removeInterval = (unitID) => {
