@@ -1,21 +1,22 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
-  const Building = sequelize.define('Building', {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      allowNull: false,
-      autoIncrement: true,
-    },
-    name: DataTypes.STRING,
-    unitType: {
-      type: DataTypes.STRING,
-    },
-    numberOfUnits: DataTypes.INTEGER,
-  }, {});
+import Sequelize from 'sequelize';
+import db from './index.js';
 
-  Building.associate = (models) => {
-    Building.hasMany(models.Unit, { as: 'units' });
-  };
-  return Building;
+const Building = db.sequelize.define('Building', {
+  id: {
+    type: Sequelize.INTEGER,
+    primaryKey: true,
+    allowNull: false,
+    autoIncrement: true,
+  },
+  name: Sequelize.STRING,
+  unitType: {
+    type: Sequelize.STRING,
+  },
+  numberOfUnits: Sequelize.INTEGER,
+}, {});
+
+Building.associate = (models) => {
+  Building.hasMany(models.Unit, { as: 'units' });
 };
+
+export default Building;

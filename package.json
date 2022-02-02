@@ -11,6 +11,7 @@
     "db:g:seed": "sequelize-cli seed:generate --name",
     "db:seeds": "sequelize-cli db:seed:all"
   },
+  "type": "module",
   "author": "Jovan Penezic",
   "license": "ISC",
   "dependencies": {
@@ -26,6 +27,7 @@
     "sequelize-cli": "^6.4.1"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.16.5",
     "eslint": "^8.7.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-node": "^4.1.0",

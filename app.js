@@ -1,13 +1,13 @@
-const express = require('express');
+import express from 'express';
 
-const helmet = require('helmet');
-const cors = require('cors');
-const rateLimiter = require('express-rate-limit');
+import helmet from 'helmet';
+import cors from 'cors';
+import rateLimiter from 'express-rate-limit';
+
+import buildingsRouter from './routes/buildings.js';
+import unitsRouter from './routes/units.js';
 
 const app = express();
-
-const buildingsRouter = require('./routes/buildings');
-const unitsRouter = require('./routes/units');
 
 app.get('/', (req, res) => {
   res.send('Hello, world');

@@ -6,4 +6,4 @@ const asyncWrapper = (fn) => async (req, res, next) => {
   }
 };
 
-module.exports = asyncWrapper;
+export default asyncWrapper;

@@ -1,16 +1,16 @@
-'use strict';
+import Sequelize from "sequelize";
 
-module.exports = {
-  up: (queryInterface, Sequelize) => queryInterface.addColumn(
-    'Units', // name of Source model
-    'feedable', // name of the column we're adding
-    {
-      type: Sequelize.BOOLEAN,
-    },
-  ),
+const up = async (queryInterface) => queryInterface.addColumn(
+  'Units', // name of Source model
+  'feedable', // name of the column we're adding
+  {
+    type: Sequelize.BOOLEAN,
+  },
+);
 
-  down: (queryInterface, Sequelize) => queryInterface.removeColumn(
-    'Units', // name of Source model
-    'feedable', // column we want to remove
-  ),
-};
+const down = async (queryInterface) => queryInterface.removeColumn(
+  'Units', // name of Source model
+  'feedable', // column we want to remove
+);
+
+export { up, down };

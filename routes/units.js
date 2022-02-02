@@ -1,16 +1,16 @@
-const express = require('express');
+import express from 'express';
 
-const router = express.Router();
-
-const {
+import {
   getAllUnits,
   getUnit,
   addUnitToBuilding,
   feedUnit,
   deleteUnit,
-} = require('../controllers/units');
+} from '../controllers/units.js';
+
+const router = express.Router();
 
 router.route('/').post(addUnitToBuilding).get(getAllUnits);
 router.route('/:id').get(getUnit).patch(feedUnit).delete(deleteUnit);
 
-module.exports = router;
+export default router;

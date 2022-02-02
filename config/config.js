@@ -1,9 +1,11 @@
 /* eslint-disable quote-props */
-require('dotenv').config();
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const { DB_HOST, DB_USERNAME, DB_PASSWORD } = process.env;
 
-module.exports = {
+const myDatabase = {
   'development': {
     'username': DB_USERNAME,
     'password': DB_PASSWORD,
@@ -26,3 +28,5 @@ module.exports = {
     'dialect': 'postgres',
   },
 };
+
+export default myDatabase;

@@ -14,7 +14,7 @@ function timeout(ms) {
 const feedingCountdowns = {}; // Countdowns for units losing health
 const feedAllUnitsIntervals = {}; // Countdowns for buildings to feed all units
 
-module.exports = {
+export {
   buildingFeedingInterval,
   unitFeedingInterval,
   unitMaxHealth,

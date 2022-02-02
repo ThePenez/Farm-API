@@ -1,15 +1,15 @@
-const express = require('express');
+import express from 'express';
 
-const router = express.Router();
-
-const {
+import {
   getAllBuildings,
   getBuilding,
   createBuilding,
   deleteBuilding,
-} = require('../controllers/buildings');
+} from '../controllers/buildings.js';
+
+const router = express.Router();
 
 router.route('/').post(createBuilding).get(getAllBuildings);
 router.route('/:id').get(getBuilding).delete(deleteBuilding);
 
-module.exports = router;
+export default router;

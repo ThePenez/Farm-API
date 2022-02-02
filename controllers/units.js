@@ -1,10 +1,11 @@
 /* eslint-disable max-len */
 /* eslint-disable consistent-return */
-const { StatusCodes } = require('http-status-codes');
-const { createCustomError } = require('../errors/custom-error');
-const asyncWrapper = require('../middleware/async-wrapper');
-const { Building, Unit } = require('../models');
-const {
+import { StatusCodes } from 'http-status-codes';
+import { createCustomError } from '../errors/custom-error.js';
+import asyncWrapper from '../middleware/async-wrapper.js';
+import Building from '../models/building.js';
+import Unit from '../models/Unit.js';
+import {
   unitFeedingInterval,
   unitMaxHealth,
   unitMinHealth,
@@ -14,14 +15,14 @@ const {
   feedingCountdowns,
   feedAllUnitsIntervals,
   manualFeedingGain,
-} = require('./config_values');
+} from './config_values.js';
 
 // ***FUNCTIONS***
-function removeInterval(unitID) {
+const removeInterval = (unitID) => {
   clearInterval(feedingCountdowns[String(unitID)]); // Stop units feeding countdown
   delete feedingCountdowns[String(unitID)]; // Delete it from the array
-}
-async function changeNumberOfUnits(buildingID, increment) { // Incerements or decrements the number of units in a building
+};
+const changeNumberOfUnits = async (buildingID, increment) => { // Incerements or decrements the number of units in a building
   const buildingToUpdate = await Building.findByPk(buildingID); // Called in case the number of units in a building changes during the interval so we have the updated value
   if (!buildingToUpdate) {
     return Promise.reject();
@@ -31,16 +32,16 @@ async function changeNumberOfUnits(buildingID, increment) { // Incerements or de
       { numberOfUnits: buildingToUpdate.numberOfUnits + increment },
       { where: { id: buildingToUpdate.id } },
     );
-}
+};
 
-async function unitDeath(unitID, buildingID) { // Declares that a unit is not alive or feedable and decreases number of units in building
+const unitDeath = async (unitID, buildingID) => { // Declares that a unit is not alive or feedable and decreases number of units in building
   await Unit
     .update(
       { health: 0, alive: false, feedable: false },
       { where: { id: unitID } },
     );
   await changeNumberOfUnits(buildingID, -1);
-}
+};
 
 // ***ROUTES***
 const getAllUnits = async (req, res) => { // GET id, type, health, aliveness and the building they're in for all farm units
@@ -130,7 +131,7 @@ const deleteUnit = asyncWrapper(async (req, res, next) => { // DELETE a unit, st
   res.status(StatusCodes.OK).json({ result });
 });
 
-module.exports = {
+export {
   getAllUnits,
   getUnit,
   addUnitToBuilding,

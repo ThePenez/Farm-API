@@ -1,23 +1,23 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
-  const Unit = sequelize.define('Unit', {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      allowNull: false,
-      autoIncrement: true,
-    },
-    type: {
-      type: DataTypes.STRING,
-    },
-    health: DataTypes.INTEGER,
-    alive: DataTypes.BOOLEAN,
-    feedable: DataTypes.BOOLEAN,
-  }, {});
+import Sequelize from 'sequelize';
+import db from './index.js';
 
-  Unit.associate = (models) => {
-    Unit.belongsTo(models.Building, { foreignKey: 'BuildingId' });
-  };
+const Unit = db.sequelize.define('Unit', {
+  id: {
+    type: Sequelize.INTEGER,
+    primaryKey: true,
+    allowNull: false,
+    autoIncrement: true,
+  },
+  type: {
+    type: Sequelize.STRING,
+  },
+  health: Sequelize.INTEGER,
+  alive: Sequelize.BOOLEAN,
+  feedable: Sequelize.BOOLEAN,
+}, {});
 
-  return Unit;
+Unit.associate = (models) => {
+  Unit.belongsTo(models.Building, { foreignKey: 'BuildingId' });
 };
+
+export default Unit;

@@ -1,10 +1,11 @@
 /* eslint-disable consistent-return */
 /* eslint-disable max-len */
-const { StatusCodes } = require('http-status-codes');
-const { createCustomError } = require('../errors/custom-error');
-const asyncWrapper = require('../middleware/async-wrapper');
-const { Building, Unit } = require('../models');
-const { buildingFeedingInterval, feedAllUnitsIntervals } = require('./config_values');
+import { StatusCodes } from 'http-status-codes';
+import { createCustomError } from '../errors/custom-error.js';
+import asyncWrapper from '../middleware/async-wrapper.js';
+import Building from '../models/building.js';
+import Unit from '../models/Unit.js';
+import { buildingFeedingInterval, feedAllUnitsIntervals } from './config_values.js';
 
 const getAllBuildings = asyncWrapper(async (req, res) => { // GET name, unit type and number of units for all buildings
   const buildings = await Building.findAll({ raw: true, attributes: ['name', 'unitType', 'numberOfUnits'] });
@@ -59,7 +60,7 @@ const deleteBuilding = asyncWrapper(async (req, res, next) => { // DELETE a buil
   res.status(StatusCodes.OK).json({ result });
 });
 
-module.exports = {
+export {
   getAllBuildings,
   getBuilding,
   createBuilding,
