@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 /* eslint-disable consistent-return */
 const { StatusCodes } = require('http-status-codes');
+const { validationResult } = require('express-validator');
 const { createCustomError } = require('../errors/custom-error');
 const asyncWrapper = require('../middleware/async-wrapper');
 const { Building, Unit } = require('../models');
@@ -21,7 +22,7 @@ function removeInterval(unitID) {
   clearInterval(feedingCountdowns[String(unitID)]); // Stop units feeding countdown
   delete feedingCountdowns[String(unitID)]; // Delete it from the array
 }
-async function changeNumberOfUnits(buildingID, increment) { // Incerements or decrements the number of units in a building
+async function changeNumberOfUnits(buildingID, increment) { // Increments or decrements the number of units in a building
   const buildingToUpdate = await Building.findByPk(buildingID); // Called in case the number of units in a building changes during the interval so we have the updated value
   if (!buildingToUpdate) {
     return Promise.reject();
@@ -51,6 +52,10 @@ const getAllUnits = async (req, res) => { // GET id, type, health, aliveness and
 
 const getUnit = asyncWrapper(async (req, res, next) => { // GET id and name of the building it's in for a specific farm unit
   const { id: unitID } = req.params;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
+  }
   const unit = await Unit.findByPk(unitID, { include: [{ model: Building, attributes: ['name'] }] });
   if (!unit) {
     return next(createCustomError(`No unit with id : ${unitID}`, StatusCodes.NOT_FOUND));
@@ -60,6 +65,10 @@ const getUnit = asyncWrapper(async (req, res, next) => { // GET id and name of t
 
 const addUnitToBuilding = asyncWrapper(async (req, res, next) => { // POST create a unit with given type and random health, add it to a building, start it's feeding countdown
   const { type, buildingId } = req.body;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
+  }
   const building = await Building.findByPk(buildingId);
   if (!building) {
     return next(createCustomError(`No building with id : ${buildingId}`, StatusCodes.NOT_FOUND));
@@ -101,6 +110,10 @@ const addUnitToBuilding = asyncWrapper(async (req, res, next) => { // POST creat
 
 const feedUnit = asyncWrapper(async (req, res, next) => { // PATCH feed unit with given id, add health to it and make it unfeedable for the set amount of miliseconds
   const { id: unitID } = req.params;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
+  }
   const unit = await Unit.findByPk(unitID);
   if (!unit.feedable) {
     return next(createCustomError('This unit cannot be fed', StatusCodes.NOT_ACCEPTABLE));
@@ -116,7 +129,10 @@ const feedUnit = asyncWrapper(async (req, res, next) => { // PATCH feed unit wit
 
 const deleteUnit = asyncWrapper(async (req, res, next) => { // DELETE a unit, stop it's feeding countdown and delete it from the array of intervals
   const { id: unitID } = req.params;
-
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
+  }
   const unit = await Unit.findByPk(unitID);
   if (unit.alive) {
     await changeNumberOfUnits(unit.BuildingId, -1); // Decrement the number of units in corespondent building by 1

@@ -1,4 +1,5 @@
 const express = require('express');
+const { body, param } = require('express-validator');
 
 const router = express.Router();
 
@@ -9,7 +10,9 @@ const {
   deleteBuilding,
 } = require('../controllers/buildings');
 
-router.route('/').post(createBuilding).get(getAllBuildings);
-router.route('/:id').get(getBuilding).delete(deleteBuilding);
+router.get('/', getAllBuildings);
+router.post('/', body('name').isIn(['Barn', 'Stable', 'Brooder house', 'Shed']), body('unitType').isIn(['Pig', 'Horse', 'Pony', 'Donkey', 'Chicken', 'Goat', 'Duck']), createBuilding);
+router.get('/:id', param('id').isInt(), getBuilding);
+router.delete('/:id', param('id').isInt(), deleteBuilding);
 
 module.exports = router;
