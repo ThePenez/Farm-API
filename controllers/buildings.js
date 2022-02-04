@@ -17,7 +17,7 @@ const getBuilding = asyncWrapper(async (req, res, next) => { // GET name, unit t
   const { id: buildingID } = req.params;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
   }
   const building = await Building.findByPk(buildingID, { attributes: ['name', 'unitType', 'numberOfUnits'], include: [{ model: Unit, as: 'units', attributes: ['id', 'health', 'alive'] }] });
   if (!building) {
@@ -30,7 +30,7 @@ const createBuilding = asyncWrapper(async (req, res) => { // POST create a build
   const { name, unitType } = req.body;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
   }
   const building = {
     name,
@@ -61,7 +61,7 @@ const deleteBuilding = asyncWrapper(async (req, res, next) => { // DELETE a buil
   const { id: buildingID } = req.params;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
   }
   clearInterval(feedAllUnitsIntervals[String(buildingID)].interval); // Stop the farm feeding interval
   delete feedAllUnitsIntervals[String(buildingID)]; // Remove it from the array

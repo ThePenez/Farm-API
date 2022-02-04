@@ -6,10 +6,8 @@ const unitMinHealth = 100; // Min unit health
 const healthLost = 1; // Health lost when the unit feeding interval ends
 const manualFeedingGain = 1; // Health a unit regains when manually fed
 
-function timeout(ms) {
-  // eslint-disable-next-line no-promise-executor-return
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+// eslint-disable-next-line no-promise-executor-return
+const timeout = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const feedingCountdowns = {}; // Countdowns for units losing health
 const feedAllUnitsIntervals = {}; // Countdowns for buildings to feed all units

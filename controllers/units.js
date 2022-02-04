@@ -16,32 +16,11 @@ const {
   feedAllUnitsIntervals,
   manualFeedingGain,
 } = require('./config_values');
-
-// ***FUNCTIONS***
-function removeInterval(unitID) {
-  clearInterval(feedingCountdowns[String(unitID)]); // Stop units feeding countdown
-  delete feedingCountdowns[String(unitID)]; // Delete it from the array
-}
-async function changeNumberOfUnits(buildingID, increment) { // Increments or decrements the number of units in a building
-  const buildingToUpdate = await Building.findByPk(buildingID); // Called in case the number of units in a building changes during the interval so we have the updated value
-  if (!buildingToUpdate) {
-    return Promise.reject();
-  }
-  await Building
-    .update(
-      { numberOfUnits: buildingToUpdate.numberOfUnits + increment },
-      { where: { id: buildingToUpdate.id } },
-    );
-}
-
-async function unitDeath(unitID, buildingID) { // Declares that a unit is not alive or feedable and decreases number of units in building
-  await Unit
-    .update(
-      { health: 0, alive: false, feedable: false },
-      { where: { id: unitID } },
-    );
-  await changeNumberOfUnits(buildingID, -1);
-}
+const {
+  removeInterval,
+  changeNumberOfUnits,
+  unitDeath,
+} = require('../middleware/helper');
 
 // ***ROUTES***
 const getAllUnits = async (req, res) => { // GET id, type, health, aliveness and the building they're in for all farm units
