@@ -61,6 +61,9 @@ const setUnitIntervals = async (unitID, buildingID) => {
   feedAllUnitsIntervals[String(buildingID)][String(unitID)] = 0; // Initialize counter for health lost during farm feeding interval
   feedingCountdowns[String(unitID)] = setInterval(async () => { // Set feeding countdown for the unit
     const unitToUpdate = await Unit.findByPk(unitID);
+    if (!unitToUpdate) {
+      return Promise.reject();
+    }
     if (unitToUpdate.health - healthLost <= 0) { // If the health reaches 0 trigger unit death
       await unitDeath(unitToUpdate.id, buildingID);
       removeInterval(unitToUpdate.id); // And remove and delete its feeding countdown
@@ -70,6 +73,7 @@ const setUnitIntervals = async (unitID, buildingID) => {
       feedAllUnitsIntervals[String(unitToUpdate.BuildingId)][String(unitToUpdate.id)] += healthLost; // Update health lost for each interval so it can regain half of it
       console.log(`Unit with id: ${unitToUpdate.id} lost ${healthLost} health`);
     }
+    return Promise.resolve();
   }, unitFeedingInterval);
 };
 
@@ -77,6 +81,9 @@ const setBuildingIntervals = async (buildingID) => {
   feedAllUnitsIntervals[String(buildingID)] = {};
   feedAllUnitsIntervals[String(buildingID)].interval = setInterval(async () => { // Feed all alive units for half the health lost in previous interval
     const buildingToFeed = await Building.findByPk(buildingID, { attributes: ['id', 'numberOfUnits'], include: [{ model: Unit, as: 'units', attributes: ['id', 'health', 'alive'] }] });
+    if (!buildingToFeed) {
+      return Promise.reject();
+    }
     let healthToRegain = 0;
     await Promise.all(buildingToFeed.units.map(async (unit) => { // Wait for all of the units health to be updated so other processes don't interfere
       if (unit.alive) {
@@ -87,6 +94,7 @@ const setBuildingIntervals = async (buildingID) => {
         setUnitIntervals(unit.id, buildingToFeed.id); // Reset the feeding countdown for the unit
       }
     }));
+    return Promise.resolve();
   }, buildingFeedingInterval);
 };
 
