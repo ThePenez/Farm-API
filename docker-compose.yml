@@ -17,15 +17,15 @@ services:
   node_backend:
     container_name: node_backend
     image: jovanpenezic/farm-simulator-2022
+    command: sh -c  "npx sequelize db:migrate && node -r dotenv/config app.js"
     build: 
       context: .
-    restart: always
     ports:
-      - "3000:3000"
+      - "$PORT:3000"
     environment:
       DB_HOST: postgres_db
-      DB_USERNAME: postgres
-      DB_PASSWORD: parapodzoli
+      DB_USERNAME: $DB_USERNAME
+      DB_PASSWORD: $DB_PASSWORD
     depends_on:
       - postgres_db
     networks:
