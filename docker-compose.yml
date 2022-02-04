@@ -6,8 +6,8 @@ services:
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_DB: database_development
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: parapodzoli
+      POSTGRES_USER: $DB_USERNAME
+      POSTGRES_PASSWORD: $DB_PASSWORD
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
