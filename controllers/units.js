@@ -6,20 +6,15 @@ const { createCustomError } = require('../errors/custom-error');
 const asyncWrapper = require('../middleware/async-wrapper');
 const { Building, Unit } = require('../models');
 const {
-  unitFeedingInterval,
-  unitMaxHealth,
-  unitMinHealth,
-  healthLost,
   unfeedableInterval,
   timeout,
-  feedingCountdowns,
-  feedAllUnitsIntervals,
   manualFeedingGain,
 } = require('./config_values');
 const {
   removeInterval,
   changeNumberOfUnits,
-  unitDeath,
+  randomHealth,
+  setUnitIntervals,
 } = require('../middleware/helper');
 
 // ***ROUTES***
@@ -55,7 +50,7 @@ const addUnitToBuilding = asyncWrapper(async (req, res, next) => { // POST creat
   if (!building.unitType.includes(type)) {
     return next(createCustomError(`A ${type} cannot be added to a ${building.name}`, StatusCodes.NOT_ACCEPTABLE));
   }
-  const health = Math.floor(Math.random() * (unitMaxHealth - unitMinHealth + 1) + unitMinHealth); // Sets health to a random number between unitHealthMax and unitHealthMin
+  const health = randomHealth(); // Sets health to a random number between unitHealthMax and unitHealthMin
   const unit = {
     type,
     health,
@@ -66,23 +61,7 @@ const addUnitToBuilding = asyncWrapper(async (req, res, next) => { // POST creat
     feedable: true,
   };
   const result = await Unit.create(unit);
-  feedAllUnitsIntervals[String(result.BuildingId)][String(result.id)] = 0; // Initialize counter for health lost during farm feeding interval
-  feedingCountdowns[String(result.id)] = setInterval(async () => { // Set feeding countdown for the unit
-    const unitToUpdate = await Unit.findByPk(result.id);
-    if (unitToUpdate.health - healthLost <= 0) { // If the health reaches 0 trigger unit death
-      await unitDeath(unitToUpdate.id, buildingId);
-      removeInterval(unitToUpdate.id); // And remove and delete its feeding countdown
-      delete feedAllUnitsIntervals[String(unitToUpdate.BuildingId)][String(unitToUpdate.id)]; // If the unit dies stop it's feeding countdown and delete her from the building feeding list
-    } else {
-      await Unit
-        .update(
-          { health: unitToUpdate.health - healthLost },
-          { where: { id: unitToUpdate.id } },
-        );
-      feedAllUnitsIntervals[String(unitToUpdate.BuildingId)][String(unitToUpdate.id)] += healthLost; // Update health lost for each interval so it can regain half of it
-      console.log(`Unit with id: ${unitToUpdate.id} lost ${healthLost} health`);
-    }
-  }, unitFeedingInterval);
+  await setUnitIntervals(result.id, result.BuildingId);
   await changeNumberOfUnits(buildingId, 1); // Increment the number of units in corespondent building by 1
   res.status(StatusCodes.CREATED).json({ result });
 });

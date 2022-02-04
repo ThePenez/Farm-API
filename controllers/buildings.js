@@ -5,7 +5,10 @@ const { validationResult } = require('express-validator');
 const { createCustomError } = require('../errors/custom-error');
 const asyncWrapper = require('../middleware/async-wrapper');
 const { Building, Unit } = require('../models');
-const { buildingFeedingInterval, feedAllUnitsIntervals } = require('./config_values');
+const { feedAllUnitsIntervals } = require('./config_values');
+const {
+  setBuildingIntervals,
+} = require('../middleware/helper');
 
 const getAllBuildings = asyncWrapper(async (req, res) => { // GET name, unit type and number of units for all buildings
   const buildings = await Building.findAll({ raw: true, attributes: ['name', 'unitType', 'numberOfUnits'] });
@@ -41,19 +44,7 @@ const createBuilding = asyncWrapper(async (req, res) => { // POST create a build
   };
 
   const result = await Building.create(building);
-  feedAllUnitsIntervals[String(result.id)] = {};
-  feedAllUnitsIntervals[String(result.id)].interval = setInterval(async () => { // Can be an individual function, Feed all alive units for half the health lost in previous interval
-    const buildingToFeed = await Building.findByPk(result.id, { attributes: ['id', 'numberOfUnits'], include: [{ model: Unit, as: 'units', attributes: ['id', 'health', 'alive'] }] });
-    let healthToRegain = 0;
-    await Promise.all(buildingToFeed.units.map(async (unit) => { // Wait for all of the units health to be updated so other processes don't interfere
-      if (unit.alive) {
-        healthToRegain = Math.ceil(feedAllUnitsIntervals[String(buildingToFeed.id)][String(unit.id)] / 2); // Calculating how much health is to be regained
-        console.log(`Unit with the id: ${unit.id} regained ${healthToRegain} health, fed by building with id: ${buildingToFeed.id}`);
-        feedAllUnitsIntervals[String(buildingToFeed.id)][String(unit.id)] = 0; // Reset the counter of lost health for next farm feeding interval
-        await Unit.update({ health: unit.health + healthToRegain }, { where: { id: unit.id } }); // Regain health
-      }
-    }));
-  }, buildingFeedingInterval);
+  await setBuildingIntervals(result.id);
   res.status(StatusCodes.CREATED).json(result);
 });
 

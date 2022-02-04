@@ -10,7 +10,8 @@ const manualFeedingGain = 1; // Health a unit regains when manually fed
 const timeout = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const feedingCountdowns = {}; // Countdowns for units losing health
-const feedAllUnitsIntervals = {}; // Countdowns for buildings to feed all units
+// eslint-disable-next-line prefer-const
+let feedAllUnitsIntervals = {}; // Countdowns for buildings to feed all units
 
 module.exports = {
   buildingFeedingInterval,
